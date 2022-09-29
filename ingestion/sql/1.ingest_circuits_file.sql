@@ -37,9 +37,14 @@ CREATE DATABASE IF NOT EXISTS processed LOCATION 'dbfs:/mnt/formula1dlepam/proce
 
 -- COMMAND ----------
 
+-- MAGIC %md
+-- MAGIC ### Write data to datalake as parquet file
+
+-- COMMAND ----------
+
 USE processed;
 
-CREATE OR TABLE circuits 
+CREATE TABLE circuits 
 USING PARQUET LOCATION 'dbfs:/mnt/formula1dlepam/processed/processed.db/circuits'
 AS
 SELECT * FROM circuits_selected;
