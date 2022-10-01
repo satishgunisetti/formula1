@@ -1,7 +1,7 @@
 -- Databricks notebook source
 -- MAGIC %md
 -- MAGIC 
--- MAGIC ### Using SQL we are loading the data from circuits.csv 
+-- MAGIC ### Using SQL we are loading the data from circuits.json 
 
 -- COMMAND ----------
 

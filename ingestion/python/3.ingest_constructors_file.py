@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC ### Ingesting constructors.csv file from Mounted ADLS container  
+# MAGIC ### Ingesting constructors.json file from Mounted ADLS container  
 
 # COMMAND ----------
 
