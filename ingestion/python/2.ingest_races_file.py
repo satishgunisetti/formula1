@@ -4,6 +4,14 @@
 
 # COMMAND ----------
 
+# MAGIC %run "../../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../../includes/common_functions"
+
+# COMMAND ----------
+
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType
 
 # COMMAND ----------
@@ -22,7 +30,7 @@ schema = StructType([StructField('race_id', IntegerType(), False),
 
 races_df = (spark.read
             .format('csv')
-            .option('path', '/mnt/formula1dlepam/raw/races.csv')
+            .option('path', f'{raw_directory}/races.csv')
             .option('header', True)
             .schema(schema)
             .load())
@@ -39,11 +47,10 @@ from pyspark.sql.functions import col, array_join, array, to_timestamp, current_
 
 # COMMAND ----------
 
-races_trans_df = ( races_df.withColumn('race_timestamp',  to_timestamp(array_join(array(col('date'), col('time')), ' '), 'yyyy-MM-dd HH:mm:ss'))
-                          .withColumn('ingestion_date', current_timestamp()) 
+races_trans_df = ( races_df.withColumn('race_timestamp',  to_timestamp(array_join(array(col('date'), col('time')), ' '), 'yyyy-MM-dd HH:mm:ss')) 
                 )
-races_select_df = races_trans_df.select('race_id', 'race_year', 'round', 'circuit_id', 'name', 'race_timestamp', 'ingestion_date')
-
+races_final_df = add_ingestion_date(races_trans_df)
+races_select_df = races_final_df.select('race_id', 'race_year', 'round', 'circuit_id', 'name', 'race_timestamp', 'ingestion_date')
 
 # COMMAND ----------
 
@@ -52,4 +59,4 @@ races_select_df = races_trans_df.select('race_id', 'race_year', 'round', 'circui
 
 # COMMAND ----------
 
-races_select_df.write.mode('overwrite').parquet('/mnt/formula1dlepam/processed/races')
+races_select_df.write.mode('overwrite').parquet(f'{processed_directory}/races')

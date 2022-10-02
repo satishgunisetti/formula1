@@ -9,6 +9,14 @@
 
 # COMMAND ----------
 
+# MAGIC %run "../../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../../includes/common_functions"
+
+# COMMAND ----------
+
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DoubleType
 
 # COMMAND ----------
@@ -36,7 +44,7 @@ schema = StructType([StructField('resultId', IntegerType(), False),
 # COMMAND ----------
 
 results_df = ( spark.read.format('json')
-                    .option('path', '/mnt/formula1dlepam/raw/results.json')
+                    .option('path', f'{raw_directory}/results.json')
                     .schema(schema)
                     .load()
              )
@@ -45,10 +53,6 @@ results_df = ( spark.read.format('json')
 
 # MAGIC %md
 # MAGIC ### Select and derive the required columns from the dataframe
-
-# COMMAND ----------
-
-from pyspark.sql.functions import  current_timestamp
 
 # COMMAND ----------
 
@@ -61,9 +65,9 @@ results_trans_df = ( results_df.withColumnRenamed('resultId', 'result_id')
                                .withColumnRenamed('fastestLap', 'fastest_lap')
                                .withColumnRenamed('fastestLapTime', 'fastest_lap_time')
                                .withColumnRenamed('fastestLapSpeed', 'fastest_lap_field')
-                               .withColumn('ingestion_date', current_timestamp())
                                .drop('statusIdstatusId')
                    )
+results_final_df = add_ingestion_date(results_trans_df)
 
 # COMMAND ----------
 
@@ -72,4 +76,4 @@ results_trans_df = ( results_df.withColumnRenamed('resultId', 'result_id')
 
 # COMMAND ----------
 
-results_trans_df.write.mode('overwrite').parquet('dbfs:/mnt/formula1dlepam/processed/results')
+results_final_df.write.mode('overwrite').parquet(f'dbfs:{processed_directory}/results')

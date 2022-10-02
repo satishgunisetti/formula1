@@ -5,9 +5,13 @@
 
 -- COMMAND ----------
 
+-- MAGIC %run "../../includes/configuration"
+
+-- COMMAND ----------
+
 CREATE OR REPLACE TEMP VIEW drivers_tv
 AS
-SELECT * FROM JSON.`/mnt/formula1dlepam/raw/drivers.json`
+SELECT * FROM JSON.`${raw.directory}/drivers.json`
 
 -- COMMAND ----------
 
@@ -32,7 +36,7 @@ USE processed;
 CREATE TABLE IF NOT EXISTS drivers
 (driver_id INT, driver_ref STRING, number INT, code STRING, name STRING, dob DATE, nationality STRING, ingestion_date TIMESTAMP)
 USING PARQUET
-LOCATION 'dbfs:/mnt/formula1dlepam/processed/processed.db/drivers'
+LOCATION 'dbfs:${processed.directory}/drivers'
 
 -- COMMAND ----------
 

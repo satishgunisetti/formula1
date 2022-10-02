@@ -10,6 +10,14 @@
 
 # COMMAND ----------
 
+# MAGIC %run "../../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../../includes/common_functions"
+
+# COMMAND ----------
+
 from pyspark.sql.types import StructType, StructField, ArrayType, DoubleType, IntegerType, StringType
 
 # COMMAND ----------
@@ -31,7 +39,7 @@ schema = StructType([StructField('circuit_id', StringType(), False),
 circuits_df = ( spark.read
                .option('header', True)
                .schema(schema)
-               .csv('dbfs:/mnt/formula1dlepam/raw/circuits.csv')
+               .csv(f'dbfs:{raw_directory}/circuits.csv')
               )
 
 # COMMAND ----------
@@ -56,12 +64,7 @@ circuits_selected_df = (circuits_df.select(col('circuit_id'), col('circuit_ref')
 
 # COMMAND ----------
 
-from pyspark.sql.functions import current_timestamp
-
-# COMMAND ----------
-
-circuits_final_df = (circuits_selected_df
-                     .withColumn('ingestion_date', current_timestamp()))
+circuits_final_df = add_ingestion_date(circuits_selected_df)
 
 # COMMAND ----------
 
@@ -70,4 +73,4 @@ circuits_final_df = (circuits_selected_df
 
 # COMMAND ----------
 
-circuits_final_df.write.mode('overwrite').parquet('dbfs:/mnt/formula1dlepam/processed/circuits')
+circuits_final_df.write.mode('overwrite').parquet(f'dbfs:{processed_directory}/circuits')

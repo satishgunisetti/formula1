@@ -4,6 +4,14 @@
 
 # COMMAND ----------
 
+# MAGIC %run "../../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../../includes/common_functions"
+
+# COMMAND ----------
+
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType
 
 # COMMAND ----------
@@ -19,7 +27,7 @@ schema = StructType([StructField('race_id', IntegerType(), False),
 # COMMAND ----------
 
 lap_times_df = ( spark.read.format('csv')
-                    .option('path', '/mnt/formula1dlepam/raw/lap_times')
+                    .option('path', f'{raw_directory}/lap_times')
                     .schema(schema)
                     .load()
              )
@@ -31,12 +39,7 @@ lap_times_df = ( spark.read.format('csv')
 
 # COMMAND ----------
 
-from pyspark.sql.functions import  current_timestamp
-
-# COMMAND ----------
-
-lap_times_trans_df = lap_times_df.withColumn('ingestion_date', current_timestamp())
-                   
+lap_times_trans_df = add_ingestion_date(lap_times_df)                   
 
 # COMMAND ----------
 
@@ -45,4 +48,4 @@ lap_times_trans_df = lap_times_df.withColumn('ingestion_date', current_timestamp
 
 # COMMAND ----------
 
-lap_times_trans_df.write.mode('overwrite').parquet('dbfs:/mnt/formula1dlepam/processed/lap_times')
+lap_times_trans_df.write.mode('overwrite').parquet(f'dbfs:{processed_directory}/lap_times')

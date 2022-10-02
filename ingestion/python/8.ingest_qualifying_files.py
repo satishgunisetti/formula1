@@ -4,6 +4,14 @@
 
 # COMMAND ----------
 
+# MAGIC %run "../../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../../includes/common_functions"
+
+# COMMAND ----------
+
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType
 
 # COMMAND ----------
@@ -22,7 +30,7 @@ schema = StructType([StructField('qualifyId', IntegerType(), False),
 # COMMAND ----------
 
 qualifying_df = ( spark.read.format('json')
-                    .option('path', '/mnt/formula1dlepam/raw/qualifying')
+                    .option('path', f'{raw_directory}/qualifying')
                     .option('multiline', True)
                     .schema(schema)
                     .load()
@@ -43,8 +51,8 @@ qualifying_trans_df = ( qualifying_df.withColumnRenamed('qualifyId', 'qualify_id
                                .withColumnRenamed('raceId', 'race_id')
                                .withColumnRenamed('driverId', 'driver_id')
                                .withColumnRenamed('constructorId', 'constructor_id')
-                               .withColumn('ingestion_date', current_timestamp())
                    )
+qualifying_final_df = add_ingestion_date(qualifying_trans_df)
 
 # COMMAND ----------
 
@@ -53,8 +61,8 @@ qualifying_trans_df = ( qualifying_df.withColumnRenamed('qualifyId', 'qualify_id
 
 # COMMAND ----------
 
-qualifying_trans_df.write.mode('overwrite').parquet('dbfs:/mnt/formula1dlepam/processed/qualify')
+qualifying_final_df.write.mode('overwrite').parquet(f'dbfs:{processed_directory}/qualify')
 
 # COMMAND ----------
 
-display(qualifying_trans_df)
+display(qualifying_final_df)

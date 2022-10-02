@@ -5,9 +5,13 @@
 
 -- COMMAND ----------
 
+-- MAGIC %run "../../includes/configuration"
+
+-- COMMAND ----------
+
 CREATE OR REPLACE TEMP VIEW results_tv
 AS
-SELECT * FROM JSON.`/mnt/formula1dlepam/raw/results.json`
+SELECT * FROM JSON.`${raw.directory}/results.json`
 
 -- COMMAND ----------
 
@@ -47,7 +51,7 @@ CREATE TABLE IF NOT EXISTS results
 (result_id INT, race_id INT, driver_id INT, constructor_id INT, number INT, grid INT, position INT, position_text STRING, position_order INT, points DOUBLE, laps INT, time STRING, 
  milliseconds INT, fastest_lap INT, rank INT, fastest_lap_time STRING, fastest_lap_field STRING, ingestion_date TIMESTAMP)
 USING PARQUET
-LOCATION 'dbfs:/mnt/formula1dlepam/processed/processed.db/results'
+LOCATION 'dbfs:${processed.directory}/results'
 
 -- COMMAND ----------
 

@@ -5,9 +5,13 @@
 
 -- COMMAND ----------
 
+-- MAGIC %run "../../includes/configuration"
+
+-- COMMAND ----------
+
 CREATE OR REPLACE TEMP VIEW constructors_tv AS
 
-SELECT * FROM JSON.`/mnt/formula1dlepam/raw/constructors.json`
+SELECT * FROM JSON.`${raw.directory}/constructors.json`
 
 -- COMMAND ----------
 
@@ -29,7 +33,7 @@ USE processed;
 CREATE TABLE IF NOT EXISTS constructors
 (constructor_id INT, constructor_ref STRING, name STRING, nationality STRING, ingestion_date TIMESTAMP)
 USING PARQUET
-LOCATION 'dbfs:/mnt/formula1dlepam/processed/processed.db/constructors'
+LOCATION 'dbfs:${processed.directory}/constructors'
 
 -- COMMAND ----------
 

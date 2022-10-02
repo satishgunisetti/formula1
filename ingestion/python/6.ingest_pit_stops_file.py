@@ -9,6 +9,14 @@
 
 # COMMAND ----------
 
+# MAGIC %run "../../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../../includes/common_functions"
+
+# COMMAND ----------
+
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType
 
 # COMMAND ----------
@@ -24,7 +32,7 @@ schema = StructType([StructField('raceId', IntegerType(), False),
 # COMMAND ----------
 
 pit_stops_df = ( spark.read.format('json')
-                    .option('path', '/mnt/formula1dlepam/raw/pit_stops.json')
+                    .option('path', f'{raw_directory}/pit_stops.json')
                     .option('multiline', True)
                     .schema(schema)
                     .load()
@@ -37,14 +45,10 @@ pit_stops_df = ( spark.read.format('json')
 
 # COMMAND ----------
 
-from pyspark.sql.functions import  current_timestamp
-
-# COMMAND ----------
-
 pit_stops_trans_df = ( pit_stops_df.withColumnRenamed('raceId', 'race_id')
                                .withColumnRenamed('driverId', 'driver_id')
-                               .withColumn('ingestion_date', current_timestamp())
                    )
+pit_stops_final_df = add_ingestion_date(pit_stops_trans_df)
 
 # COMMAND ----------
 
@@ -53,4 +57,4 @@ pit_stops_trans_df = ( pit_stops_df.withColumnRenamed('raceId', 'race_id')
 
 # COMMAND ----------
 
-pit_stops_trans_df.write.mode('overwrite').parquet('dbfs:/mnt/formula1dlepam/processed/pit_stops')
+pit_stops_final_df.write.mode('overwrite').parquet(f'dbfs:{processed_directory}/pit_stops')

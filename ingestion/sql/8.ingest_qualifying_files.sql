@@ -5,10 +5,14 @@
 
 -- COMMAND ----------
 
+-- MAGIC %run "../../includes/configuration"
+
+-- COMMAND ----------
+
 -- selecting the required columns and defining the ingestion date column
 CREATE OR REPLACE TEMP VIEW qualifying_tv
 USING JSON
-OPTIONS(path '/mnt/formula1dlepam/raw/qualifying', multiline True)
+OPTIONS(path '${raw.directory}/qualifying', multiline True)
 
 -- COMMAND ----------
 
@@ -35,7 +39,7 @@ USE processed;
 CREATE TABLE IF NOT EXISTS qualifying
 (qualify_id INT, race_id INT, driver_id INT, constructor_id INT, number INT, position INT, q1 STRING, q2 STRING, q3 STRING, ingestion_date TIMESTAMP)
 USING PARQUET
-LOCATION 'dbfs:/mnt/formula1dlepam/processed/processed.db/qualifying'
+LOCATION 'dbfs:${processed.directory}/qualifying'
 
 -- COMMAND ----------
 

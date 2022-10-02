@@ -9,13 +9,21 @@
 
 # COMMAND ----------
 
+# MAGIC %run "../../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../../includes/common_functions"
+
+# COMMAND ----------
+
 schema = 'constructorId INT, constructorRef STRING, name STRING, nationality STRING, url STRING'
 
 # COMMAND ----------
 
 cons_df = ( spark.read.format('json')
                .schema(schema)
-               .load('/mnt/formula1dlepam/raw/constructors.json')
+               .load(f'{raw_directory}/constructors.json')
           )
 
 # COMMAND ----------
@@ -31,9 +39,9 @@ from pyspark.sql.functions import current_timestamp
 
 cons_transformed_df = ( cons_df.withColumnRenamed('constructorId', 'constructor_id')
                                .withColumnRenamed('constructorRef', 'constructor_ref')
-                               .withColumn('ingestion_date', current_timestamp())
-                               .select('constructor_id', 'constructor_ref', 'name', 'nationality', 'ingestion_date')
+                               
                       )
+cons_final_df = add_ingestion_date(cons_transformed_df).select('constructor_id', 'constructor_ref', 'name', 'nationality', 'ingestion_date')
 
 # COMMAND ----------
 
@@ -42,4 +50,4 @@ cons_transformed_df = ( cons_df.withColumnRenamed('constructorId', 'constructor_
 
 # COMMAND ----------
 
-cons_transformed_df.write.mode('overwrite').parquet('dbfs:/mnt/formula1dlepam/processed/constructors')
+cons_final_df.write.mode('overwrite').parquet(f'dbfs:{processed_directory}/constructors')

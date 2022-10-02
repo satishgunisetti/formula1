@@ -10,8 +10,12 @@
 
 -- COMMAND ----------
 
+-- MAGIC %run "../../includes/configuration"
+
+-- COMMAND ----------
+
 CREATE OR REPLACE TEMP VIEW pit_stops_tv
-USING JSON OPTIONS(path '/mnt/formula1dlepam/raw/pit_stops.json', multiline True)
+USING JSON OPTIONS(path '${raw.directory}/pit_stops.json', multiline True)
 
 -- COMMAND ----------
 
@@ -33,10 +37,10 @@ FROM pit_stops_tv
 -- creating the external table
 USE processed;
 
-CREATE TABLE pit_stops
+CREATE TABLE IF NOT EXISTS pit_stops
 (race_id INT, driver_id INT, stop STRING, lap INT, time STRING, duration STRING, milliseconds INT, ingestion_date TIMESTAMP)
 USING PARQUET
-LOCATION 'dbfs:/mnt/formula1dlepam/processed/processed.db/pit_stops'
+LOCATION 'dbfs:${processed.directory}/pit_stops'
 
 -- COMMAND ----------
 

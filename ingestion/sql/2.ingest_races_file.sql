@@ -5,12 +5,16 @@
 
 -- COMMAND ----------
 
+-- MAGIC %run "../../includes/configuration"
+
+-- COMMAND ----------
+
 -- creating the temp view with required column names 
 
 CREATE OR REPLACE TEMP VIEW races_tv
 (race_id INT, race_year INT, round INT, circuit_id INT, name STRING, date STRING, time STRING, url STRING)
 USING CSV
-OPTIONS (path = '/mnt/formula1dlepam/raw/races.csv', header = 'true')
+OPTIONS (path = '${raw.directory}/races.csv', header = 'true')
 
 -- COMMAND ----------
 
@@ -32,18 +36,28 @@ FROM races_tv
 
 -- COMMAND ----------
 
+CREATE TABLE IF NOT EXISTS processed.races (
+  race_id INT,
+  race_year INT,
+  round INT,
+  circuit_id INT,
+  name STRING,
+  race_timestamp TIMESTAMP,
+  ingestion_timestamp TIMESTAMP)
+USING PARQUET
+LOCATION 'dbfs:${processed.directory}/races'
+
+-- COMMAND ----------
+
 -- MAGIC %md
 -- MAGIC ### Write data to datalake as parquet file
 
 -- COMMAND ----------
 
-USE processed;
 
-CREATE TABLE races 
-USING PARQUET LOCATION 'dbfs:/mnt/formula1dlepam/processed/processed.db/races'
-AS
+INSERT OVERWRITE processed.races
 SELECT * FROM races_transformed;
 
 -- COMMAND ----------
 
-SELECT * FROM races;
+SELECT * FROM  races;

@@ -5,11 +5,15 @@
 
 -- COMMAND ----------
 
+-- MAGIC %run "../../includes/configuration"
+
+-- COMMAND ----------
+
 -- selecting the required columns and defining the ingestion date column
 CREATE OR REPLACE TEMP VIEW lap_times_tv
 (race_id INT, driver_id INT, lap INT, position INT, time STRING, milliseconds INT)
 USING CSV 
-OPTIONS(path '/mnt/formula1dlepam/raw/lap_times')
+OPTIONS(path '${raw.directory}/lap_times')
 
 -- COMMAND ----------
 
@@ -23,7 +27,7 @@ USE processed;
 CREATE TABLE IF NOT EXISTS lap_times
 (race_id INT, driver_id INT, lap INT, position INT, time STRING, milliseconds INT, ingestion_date TIMESTAMP)
 USING PARQUET
-LOCATION 'dbfs:/mnt/formula1dlepam/processed/processed.db/lap_times'
+LOCATION 'dbfs:${processed.directory}/lap_times'
 
 -- COMMAND ----------
 

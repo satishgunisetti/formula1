@@ -5,13 +5,16 @@
 
 -- COMMAND ----------
 
+-- MAGIC %run "../../includes/configuration"
+
+-- COMMAND ----------
+
 -- creating the temp view with required column names 
 
 CREATE OR REPLACE TEMP VIEW circuits_tv
 (circuit_id STRING, circuit_ref STRING, name STRING, location STRING, country STRING, latitude DOUBLE, longitude DOUBLE, altitude DOUBLE, url STRING)
 USING CSV
-OPTIONS (path="/mnt/formula1dlepam/raw/circuits.csv", header="true") -- , inferschema="true"
-
+OPTIONS (path="${raw.directory}/circuits.csv", header="true")
 
 -- COMMAND ----------
 
@@ -33,7 +36,24 @@ AS
 
 -- COMMAND ----------
 
-CREATE DATABASE IF NOT EXISTS processed LOCATION 'dbfs:/mnt/formula1dlepam/processed/processed.db';
+CREATE DATABASE IF NOT EXISTS processed LOCATION '${processed.directory}';
+
+-- COMMAND ----------
+
+USE processed;
+
+CREATE TABLE IF NOT EXISTS processed.circuits (
+  circuit_id STRING,
+  circuit_ref STRING,
+  name STRING,
+  location STRING,
+  country STRING,
+  latitude DOUBLE,
+  longitude DOUBLE,
+  altitude DOUBLE,
+  ingestion_date TIMESTAMP)
+USING PARQUET
+LOCATION 'dbfs:${processed.directory}/circuits'
 
 -- COMMAND ----------
 
@@ -42,14 +62,9 @@ CREATE DATABASE IF NOT EXISTS processed LOCATION 'dbfs:/mnt/formula1dlepam/proce
 
 -- COMMAND ----------
 
-USE processed;
-
-CREATE TABLE circuits 
-USING PARQUET LOCATION 'dbfs:/mnt/formula1dlepam/processed/processed.db/circuits'
-AS
+INSERT OVERWRITE processed.circuits 
 SELECT * FROM circuits_selected;
-
 
 -- COMMAND ----------
 
-SELECT * FROM circuits
+SELECT * FROM  circuits

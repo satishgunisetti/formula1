@@ -9,6 +9,14 @@
 
 # COMMAND ----------
 
+# MAGIC %run "../../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../../includes/common_functions"
+
+# COMMAND ----------
+
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DateType
 
 # COMMAND ----------
@@ -32,7 +40,7 @@ schema = StructType([StructField('driverId', IntegerType(), False),
 # COMMAND ----------
 
 drivers_df = ( spark.read.format('json')
-                    .option('path', '/mnt/formula1dlepam/raw/drivers.json')
+                    .option('path', f'{raw_directory}/drivers.json')
                     .schema(schema)
                     .load()
              )
@@ -51,9 +59,9 @@ from pyspark.sql.functions import array, array_join, col, current_timestamp
 drivers_trans_df = ( drivers_df.withColumnRenamed('driverId', 'driver_id')
                                .withColumnRenamed('driverRef', 'driver_ref')
                                .withColumn('name', array_join(array(col('name.forename'), col('name.surname')), ' '))
-                               .withColumn('ingestion_date', current_timestamp())
                                .drop('url')
                    )
+drivers_final_df = add_ingestion_date(drivers_trans_df)
 
 # COMMAND ----------
 
@@ -62,4 +70,4 @@ drivers_trans_df = ( drivers_df.withColumnRenamed('driverId', 'driver_id')
 
 # COMMAND ----------
 
-drivers_trans_df.write.mode('overwrite').parquet('dbfs:/mnt/formula1dlepam/processed/drivers')
+drivers_final_df.write.mode('overwrite').parquet(f'dbfs:{processed_directory}/drivers')
